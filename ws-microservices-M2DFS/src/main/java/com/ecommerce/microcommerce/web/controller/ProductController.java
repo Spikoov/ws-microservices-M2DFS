@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -22,13 +24,25 @@ import java.util.List;
 
 
 @RestController
+@Api
 public class ProductController {
 
     @Autowired
     private ProductDao productDao;
 
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden Access"),
+            @ApiResponse(code = 404, message = "Not Found")
+    })
 
     //Récupérer la liste des produits
+    @ApiOperation(
+            value = "Get list of products",
+            response = Iterable.class,
+            tags = "listeProduits"
+    )
     @RequestMapping(value = "/Produits", method = RequestMethod.GET)
     public MappingJacksonValue listeProduits() {
         Iterable<Product> produits = productDao.findAll();
@@ -41,6 +55,11 @@ public class ProductController {
 
 
     //Récupérer un produit par son Id
+    @ApiOperation(
+            value = "Get a product by id",
+            response = Product.class,
+            tags = "afficherUnProduit"
+    )
     @RequestMapping(value = "/Produit/{id}", method = RequestMethod.GET)
     public Product afficherUnProduit(@PathVariable int id ) {
         return productDao.findById(id);
@@ -50,6 +69,10 @@ public class ProductController {
 
 
     //ajouter un produit
+    @ApiOperation(
+            value = "Add a product",
+            tags = "ajouterProduit"
+    )
     @PostMapping(value = "/Produits")
     public ResponseEntity<Void> ajouterProduit(@Valid @RequestBody Product product) {
 
@@ -73,12 +96,20 @@ public class ProductController {
     }
 
     // supprimer un produit
+    @ApiOperation(
+            value = "Delete a product",
+            tags = "supprimerProduit"
+    )
     @RequestMapping(value = "/DeleteProduit/{id}", method = RequestMethod.DELETE)
     public void supprimerProduit(@PathVariable int id) {
         productDao.delete(id);
     }
 
     // Mettre à jour un produit
+    @ApiOperation(
+            value = "Update a product",
+            tags = "updateProduit"
+    )
     @PostMapping(value = "/UpdateProduit")
     public void updateProduit(@RequestBody Product product) {
         if(product.getPrix() > 0){
@@ -89,17 +120,32 @@ public class ProductController {
         }
     }
 
+    @ApiOperation(
+            value = "Get list of products ordered by name",
+            response = Iterable.class,
+            tags = "triParOrdreAlphabetique"
+    )
     @GetMapping(value = "/ProduitsOrderByName")
     public List<Product> triParOrdreAlphabetique(){
         return productDao.findByOrderByNomAsc();
     }
 
     //Pour les tests
+    @ApiOperation(
+            value = "Request test",
+            response = Iterable.class,
+            tags = "testeDeRequetes"
+    )
     @GetMapping(value = "test/produits/{prix}")
     public List<Product>  testeDeRequetes(@PathVariable int prix) {
         return productDao.chercherUnProduitCher(400);
     }
 
+    @ApiOperation(
+            value = "Calculate margin",
+            response = String.class,
+            tags = "calculerMargeProduit"
+    )
     @GetMapping(value = "/AdminProduits")
     public String calculerMargeProduit() {
         String response = "{<br>";
