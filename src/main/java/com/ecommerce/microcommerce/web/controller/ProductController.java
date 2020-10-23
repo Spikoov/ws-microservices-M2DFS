@@ -80,6 +80,10 @@ public class ProductController {
         productDao.findById(product.getId()).setPrixAchat(product.getPrixAchat());
     }
 
+    @GetMapping(value = "/ProduitsOrderByName")
+    public List<Product> triParOrdreAlphabetique(){
+        return productDao.findByOrderByNomAsc();
+    }
 
     //Pour les tests
     @GetMapping(value = "test/produits/{prix}")
@@ -88,12 +92,11 @@ public class ProductController {
     }
 
     @GetMapping(value = "/AdminProduits")
-    public String calculerMargeProduit(){
+    public String calculerMargeProduit() {
         String response = "{<br>";
-        for (Product produit:productDao.findAll()) {
+        for (Product produit : productDao.findAll()) {
             response += produit + ": " + Integer.toString(produit.getPrix() - produit.getPrixAchat()) + "<br>";
         }
         return response + "}";
     }
-
 }
