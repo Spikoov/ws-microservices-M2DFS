@@ -2,6 +2,7 @@ package com.ecommerce.microcommerce.web.controller;
 
 import com.ecommerce.microcommerce.dao.ProductDao;
 import com.ecommerce.microcommerce.model.Product;
+import com.ecommerce.microcommerce.web.exceptions.ProduitGratuitException;
 import com.ecommerce.microcommerce.web.exceptions.ProduitIntrouvableException;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
@@ -52,18 +53,23 @@ public class ProductController {
     @PostMapping(value = "/Produits")
     public ResponseEntity<Void> ajouterProduit(@Valid @RequestBody Product product) {
 
-        Product productAdded =  productDao.save(product);
+        if(product.getPrix() > 0){
+            Product productAdded = productDao.save(product);
 
-        if (productAdded == null)
-            return ResponseEntity.noContent().build();
+            if (productAdded == null)
+                return ResponseEntity.noContent().build();
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(productAdded.getId())
-                .toUri();
+            URI location = ServletUriComponentsBuilder
+                    .fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(productAdded.getId())
+                    .toUri();
 
-        return ResponseEntity.created(location).build();
+            return ResponseEntity.created(location).build();
+        }
+        else {
+            throw new ProduitGratuitException("Le prix de vente ne peux être 0");
+        }
     }
 
     // supprimer un produit
@@ -75,9 +81,12 @@ public class ProductController {
     // Mettre à jour un produit
     @PostMapping(value = "/UpdateProduit")
     public void updateProduit(@RequestBody Product product) {
-        productDao.findById(product.getId()).setNom(product.getNom());
-        productDao.findById(product.getId()).setPrix(product.getPrix());
-        productDao.findById(product.getId()).setPrixAchat(product.getPrixAchat());
+        if(product.getPrix() > 0){
+            productDao.save(product);
+        }
+        else {
+            throw new ProduitGratuitException("Le prix de vente ne peut   être 0");
+        }
     }
 
     @GetMapping(value = "/ProduitsOrderByName")
