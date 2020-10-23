@@ -16,10 +16,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 
-
+@RestController
 public class ProductController {
 
     @Autowired
@@ -86,6 +87,13 @@ public class ProductController {
         return productDao.chercherUnProduitCher(400);
     }
 
-
+    @GetMapping(value = "/AdminProduits")
+    public String calculerMargeProduit(){
+        String response = "{<br>";
+        for (Product produit:productDao.findAll()) {
+            response += produit + ": " + Integer.toString(produit.getPrix() - produit.getPrixAchat()) + "<br>";
+        }
+        return response + "}";
+    }
 
 }
